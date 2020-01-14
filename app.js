@@ -1,10 +1,10 @@
 'use strict';
 
-// load modules
+// Load modules
 const express = require('express');
 const morgan = require('morgan');
-const routes = require('./routes')
-
+const routes = require('./routes');
+const bodyParser = require('body-parser');
 const { sequelize } = require('./models');
 
 
@@ -13,6 +13,10 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 
 // create the Express app
 const app = express();
+
+// Setup json parsing
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));

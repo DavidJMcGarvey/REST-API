@@ -108,46 +108,4 @@ router.post('/users', [
   res.status(201).end();
 }));
 
-// GET course listing route
-router.get('/courses', asyncHandler( async(req, res) => {
-  const courses = await Course.findAll();
-  courses.map(course => console.log(course));
-  // res.json({
-
-  // });
-}));
-
-// GET particular course AND user who created it
-router.get('/courses/:id', asyncHandler( async(req, res) => {
-  const course = await Course.findByPk(req.params.id);
-
-  // res.json({
-
-  // });
-}));
-
-// POST create a course route
-router.post('/courses', asyncHandler( async(req, res) => {
-
-  // res.json({
-
-  // });
-}));
-
-// PUT update a course route
-router.put('/courses/:id', asyncHandler( async(req, res) => {
-
-  // res.json({
-
-  // });
-}));
-
-// DELETE delete a course route
-router.delete('/courses/:id', asyncHandler( async(req, res) => {
-
-  // res.json({
-
-  // });
-}));
-
 module.exports = router;
