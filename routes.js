@@ -2,7 +2,6 @@
 
 const express = require('express');
 const router = express.Router();
-const { check, validationResult } = require('express-validator');
 const bcryptjs = require('bcryptjs');
 const auth = require('basic-auth');
 
@@ -21,6 +20,47 @@ function asyncHandler(cb){
   }
 }
 
+// Authenication middleware
+const authenticateUser = async (req, res, next) => {
+  let message = null;
+
+  const credentials = auth(req);
+
+
+  if (credentials) {
+
+    // const user = users.find(u => u.username === credentials.name);
+    const user = await User.findOne({
+      where: {
+        emailAddress: credentials.name,
+      },
+    });
+
+    if (user) {
+      const authenticated = bcryptjs
+        .compareSync(credentials.pass, user.password);
+
+      if (authenticated) {
+        console.log(`Authentication successful for username: ${user.username}`);
+        req.currentUser = user;
+      } else {
+        message = `Authentication failure for username: ${user.username}`;
+      } 
+    } else {
+      message = `User not found for username: ${credentials.name}`;
+    }
+  } else {
+    message = `Auth header not found`;
+  }
+  
+  if (message) {
+    console.warn(message);
+    res.status(401).json({ message: 'Access Denied' });
+  } else {
+    next();
+  }
+};
+
 // setup a friendly greeting for the root route
 router.get('/', (req, res) => {
   res.json({
@@ -29,9 +69,17 @@ router.get('/', (req, res) => {
 });
 
 // GET return current user route
-router.get('/users', asyncHandler( async(req, res) => {
-  const users = await User.findAll();
-  users.map(user => console.log(user));
+router.get('/users', authenticateUser, (req, res) => {
+  const user = req.currentUser;
+  console.log(user);
+  res.json({
+    username: user.emailAddress
+  });
+});
+
+// POST create a user route
+router.post('/users', asyncHandler( async(req, res) => {
+  const user = req.body;
   // res.json({
 
   // });
@@ -49,14 +97,6 @@ router.get('/courses', asyncHandler( async(req, res) => {
 // GET particular course AND user who created it
 router.get('/courses/:id', asyncHandler( async(req, res) => {
   const course = await Course.findByPk(req.params.id);
-
-  // res.json({
-
-  // });
-}));
-
-// POST create a user route
-router.post('/users', asyncHandler( async(req, res) => {
 
   // res.json({
 
