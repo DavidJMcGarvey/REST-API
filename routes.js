@@ -69,8 +69,8 @@ router.get('/', (req, res) => {
 // GET return current user route
 router.get('/users', authenticateUser, (req, res) => {
   const user = req.currentUser;
-  console.log(user);
   res.json({
+    // just `user` ??
     username: user.emailAddress
   });
 });
@@ -111,43 +111,69 @@ router.post('/users', [
 // GET course listing route
 router.get('/courses', asyncHandler( async(req, res) => {
   const courses = await Course.findAll();
-  courses.map(course => console.log(course));
-  // res.json({
-
-  // });
+  res.json({
+    courses
+  });
 }));
 
 // GET particular course AND user who created it
 router.get('/courses/:id', asyncHandler( async(req, res) => {
   const course = await Course.findByPk(req.params.id);
-
-  // res.json({
-
-  // });
+  res.json({
+    course
+  });
 }));
 
 // POST create a course route
-router.post('/courses', asyncHandler( async(req, res) => {
+router.post('/courses', [
+  check('title')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please provide a value for "title"'),
+  check('description')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please provide a value for "description"'),
+  check('estimatedTime')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please provide a value for "estimatedTime"'),
+  check('materialsNeeded')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please provide a value for "materialsNeeded"'),
+], asyncHandler( async(req, res) => {
 
-  // res.json({
+  await Course.create(req.body);
 
-  // });
+  res.status(201).end();
+
 }));
 
 // PUT update a course route
 router.put('/courses/:id', asyncHandler( async(req, res) => {
+  let course = await Course.findByPk(req.params.id);
 
-  // res.json({
+  if (course) {
+    course.title = req.body.title;
+    course.description = req.body.description;
+    course.estimatedTime = req.body.estimatedTime;
+    course.materialsNeeded = req.body.materialsNeeded;
+  
+    await course.save();
+    res.status(204).end();
+  } else {
+    res.status(404).json({message: "Couldn't find that course :("});
+  }
 
-  // });
 }));
 
 // DELETE delete a course route
 router.delete('/courses/:id', asyncHandler( async(req, res) => {
+  let course = await Course.findByPk(req.params.id);
 
-  // res.json({
-
-  // });
+  if (course) {
+    await course.destroy();
+    res.status(204).end();
+  } else {
+    res.status(404).json({message: "Couldn't find that course :("});
+  }
 }));
 
 module.exports = router;
