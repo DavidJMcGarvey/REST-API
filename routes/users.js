@@ -58,17 +58,7 @@ const authenticateUser = async (req, res, next) => {
   }
 };
 
-// GET /api/users 200 - return current user route
-router.get('/users', authenticateUser, (req, res) => {
-  const user = req.currentUser;
-  res.json({
-    // just `user` ??
-    username: user.emailAddress
-  });
-});
-
-// POST /api/users 201 - create a user route
-router.post('/users', [
+const userChecker = [
   check('firstName')
     .exists({ checkNull: true, checkFalsy: true })
     .withMessage('Please provide a value for "firstName"'),
@@ -81,23 +71,48 @@ router.post('/users', [
   check('password')
     .exists({ checkNull: true, checkFalsy: true })
     .withMessage('Please provide a value for "password"'),
-], asyncHandler( async(req, res) => {
+];
 
+// GET /api/users 200 - return current user route
+router.get('/users', authenticateUser, (req, res) => {
+  const user = req.currentUser;
+  res.json({
+    user
+  });
+});
+
+// POST /api/users 201 - create a user route
+router.post('/users', userChecker, asyncHandler( async(req, res) => {
   const errors =  validationResult(req);
-
   if (!errors.isEmpty()) {
     const errorMessages = errors.array().map(error => error.msg);
-
     return res.status(400).json({ errors: errorMessages });
+  } else {
+    const user = await req.body;
+    user.password = bcryptjs.hashSync(user.password);
+
+    await User.create(req.body);
+    res.status(201).end();
   }
 
-  const user = await req.body;
+}));
 
-  user.password = bcryptjs.hashSync(user.password);
+// PUT /api/courses/:id 204 - update a course route
+router.put('/users/:id', authenticateUser, asyncHandler( async(req, res) => {
+  let user = await User.findByPk(req.params.id);
 
-  await User.create(req.body);
+  if (user) {
+    user.firstName = req.body.firstName;
+    user.lastName = req.body.lastName;
+    user.emailAddress = req.body.emailAddress;
+    user.password = req.body.password;
+    
+    await user.save();
+    res.status(204).end();
+  } else {
+    res.status(404).json({message: "Couldn't find that user :("});
+  }
 
-  res.status(201).end();
 }));
 
 module.exports = router;

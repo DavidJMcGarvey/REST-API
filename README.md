@@ -2,33 +2,11 @@
 ##          REST API         ##
 -------------------------------
 
+Welcome to my REST API for a made up school curriculum! Where you GET the enjoyment of a clean database with the validation features, but you stay PUT becuase the user authentication.
+
 *Application Description and Goals:* 
 
-*Technologies:*
-
-*Screenshots:*
-![img]()
-![img]()
-![img]()
-
-
-# FSJS-techdegree-project-09
-REST API
-
-# Full Stack JavaScript Techdegree v2 - REST API Project
-
-## Overview of the Provided Project Files
-
-We've supplied the following files for you to use: 
-
-* The `seed` folder contains a starting set of data for your database in the form of a JSON file (`data.json`) and a collection of files (`context.js`, `database.js`, and `index.js`) that can be used to create your app's database and populate it with data (we'll explain how to do that below).
-* We've included a `.gitignore` file to ensure that the `node_modules` folder doesn't get pushed to your GitHub repo.
-* The `app.js` file configures Express to serve a simple REST API. We've also configured the `morgan` npm package to log HTTP requests/responses to the console. You'll update this file with the routes for the API. You'll update this file with the routes for the API.
-* The `nodemon.js` file configures the nodemon Node.js module, which we are using to run your REST API.
-* The `package.json` file (and the associated `package-lock.json` file) contain the project's npm configuration, which includes the project's dependencies.
-* The `RESTAPI.postman_collection.json` file is a collection of Postman requests that you can use to test and explore your REST API.
-
-## Getting Started
+This REST API takes care of the under the hood operations of a school curriculum database. Authenicated _Users_ can create, edit, and delete _Courses_ with proper validation in place on the model level to maintain clean data in the database.
 
 To get up and running with this project, run the following commands from the root of the folder that contains this README file.
 
@@ -52,3 +30,18 @@ npm start
 ```
 
 To test the Express server, browse to the URL [http://localhost:5000/](http://localhost:5000/).
+
+The `RESTAPI.postman_collection.json` file is a collection of Postman requests that you can use to test and explore your REST API.
+
+*Technologies:*
+
+1. JavaScript
+2. REST API
+3. Sequelize
+4. SQLite
+5. Password Hashing
+
+*Screenshots:*
+![img](https://user-images.githubusercontent.com/42125523/72650554-b91da880-3935-11ea-9806-b993b26bc3cc.png)
+![img](https://user-images.githubusercontent.com/42125523/72650555-b91da880-3935-11ea-87fe-95b1c333c7e1.png)
+![img](https://user-images.githubusercontent.com/42125523/72650556-b91da880-3935-11ea-9cb7-ba0f1215d56f.png)

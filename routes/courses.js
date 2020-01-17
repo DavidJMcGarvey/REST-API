@@ -8,6 +8,7 @@ const { check, validationResult } = require('express-validator');
 
 // Import sequelize model
 const Course = require('../models').Course;
+const User = require('../models').User;
 
 // Handler function to wrap each route.
 function asyncHandler(cb){
@@ -58,6 +59,21 @@ const authenticateUser = async (req, res, next) => {
   }
 };
 
+const courseChecker = [
+  check('title')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please provide a value for "title"'),
+  check('description')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please provide a value for "description"'),
+  check('estimatedTime')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please provide a value for "estimatedTime"'),
+  check('materialsNeeded')
+    .exists({ checkNull: true, checkFalsy: true })
+    .withMessage('Please provide a value for "materialsNeeded"'),
+];
+
 // GET /api/courses 200 - course listing route
 router.get('/courses', asyncHandler( async(req, res) => {
   const courses = await Course.findAll();
@@ -75,39 +91,37 @@ router.get('/courses/:id', asyncHandler( async(req, res) => {
 }));
 
 // POST /api/courses/:id 201 - create a course route
-router.post('/courses', [
-  check('title')
-    .exists({ checkNull: true, checkFalsy: true })
-    .withMessage('Please provide a value for "title"'),
-  check('description')
-    .exists({ checkNull: true, checkFalsy: true })
-    .withMessage('Please provide a value for "description"'),
-  check('estimatedTime')
-    .exists({ checkNull: true, checkFalsy: true })
-    .withMessage('Please provide a value for "estimatedTime"'),
-  check('materialsNeeded')
-    .exists({ checkNull: true, checkFalsy: true })
-    .withMessage('Please provide a value for "materialsNeeded"'),
-], asyncHandler( async(req, res) => {
-
-  await Course.create(req.body);
-
-  res.status(201).end();
+router.post('/courses', courseChecker, authenticateUser, asyncHandler( async(req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const errorsMessages = errors.array().map(error => error.msg);
+    return res.status(400).json({message: errorsMessages});
+  } else {
+    await Course.create(req.body);
+    res.status(201).end();
+  }
 
 }));
 
 // PUT /api/courses/:id 204 - update a course route
-router.put('/courses/:id', asyncHandler( async(req, res) => {
+router.put('/courses/:id', courseChecker, authenticateUser, asyncHandler( async(req, res) => {
   let course = await Course.findByPk(req.params.id);
-
   if (course) {
-    course.title = req.body.title;
-    course.description = req.body.description;
-    course.estimatedTime = req.body.estimatedTime;
-    course.materialsNeeded = req.body.materialsNeeded;
-  
-    await course.save();
-    res.status(204).end();
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      const errorsMessages = errors.array().map(error => error.msg);
+      return res.status(400).json({message: errorsMessages});
+    } else {
+      course.title = req.body.title;
+      course.description = req.body.description;
+      course.estimatedTime = req.body.estimatedTime;
+      course.materialsNeeded = req.body.materialsNeeded;
+    
+      await course.save();
+      res.status(204).end();
+    }
+
   } else {
     res.status(404).json({message: "Couldn't find that course :("});
   }
@@ -115,7 +129,7 @@ router.put('/courses/:id', asyncHandler( async(req, res) => {
 }));
 
 // DELETE /api/courses/:id 204 - delete a course route
-router.delete('/courses/:id', asyncHandler( async(req, res) => {
+router.delete('/courses/:id', authenticateUser, asyncHandler( async(req, res) => {
   let course = await Course.findByPk(req.params.id);
 
   if (course) {
