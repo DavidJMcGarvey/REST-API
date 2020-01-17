@@ -6,9 +6,8 @@ const bcryptjs = require('bcryptjs');
 const auth = require('basic-auth');
 const { check, validationResult } = require('express-validator');
 
-// Import sequelize models
-const User = require('./models').User;
-const Course = require('./models').Course;
+// Import sequelize model
+const User = require('../models').User;
 
 // Handler function to wrap each route.
 function asyncHandler(cb){
@@ -59,23 +58,16 @@ const authenticateUser = async (req, res, next) => {
   }
 };
 
-// setup a friendly greeting for the root route
-router.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to the REST API project!',
-  });
-});
-
-// GET return current user route
+// GET /api/users 200 - return current user route
 router.get('/users', authenticateUser, (req, res) => {
   const user = req.currentUser;
-  console.log(user);
   res.json({
+    // just `user` ??
     username: user.emailAddress
   });
 });
 
-// POST create a user route
+// POST /api/users 201 - create a user route
 router.post('/users', [
   check('firstName')
     .exists({ checkNull: true, checkFalsy: true })

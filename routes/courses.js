@@ -6,9 +6,8 @@ const bcryptjs = require('bcryptjs');
 const auth = require('basic-auth');
 const { check, validationResult } = require('express-validator');
 
-// Import sequelize models
-const User = require('./models').User;
-const Course = require('./models').Course;
+// Import sequelize model
+const Course = require('../models').Course;
 
 // Handler function to wrap each route.
 function asyncHandler(cb){
@@ -59,56 +58,7 @@ const authenticateUser = async (req, res, next) => {
   }
 };
 
-// setup a friendly greeting for the root route
-router.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to the REST API project!',
-  });
-});
-
-// GET return current user route
-router.get('/users', authenticateUser, (req, res) => {
-  const user = req.currentUser;
-  res.json({
-    // just `user` ??
-    username: user.emailAddress
-  });
-});
-
-// POST create a user route
-router.post('/users', [
-  check('firstName')
-    .exists({ checkNull: true, checkFalsy: true })
-    .withMessage('Please provide a value for "firstName"'),
-  check('lastName')
-    .exists({ checkNull: true, checkFalsy: true })
-    .withMessage('Please provide a value for "lastName"'),
-  check('emailAddress')
-    .exists({ checkNull: true, checkFalsy: true })
-    .withMessage('Please provide a value for "emailAddress"'),
-  check('password')
-    .exists({ checkNull: true, checkFalsy: true })
-    .withMessage('Please provide a value for "password"'),
-], asyncHandler( async(req, res) => {
-
-  const errors =  validationResult(req);
-
-  if (!errors.isEmpty()) {
-    const errorMessages = errors.array().map(error => error.msg);
-
-    return res.status(400).json({ errors: errorMessages });
-  }
-
-  const user = await req.body;
-
-  user.password = bcryptjs.hashSync(user.password);
-
-  await User.create(req.body);
-
-  res.status(201).end();
-}));
-
-// GET course listing route
+// GET /api/courses 200 - course listing route
 router.get('/courses', asyncHandler( async(req, res) => {
   const courses = await Course.findAll();
   res.json({
@@ -116,7 +66,7 @@ router.get('/courses', asyncHandler( async(req, res) => {
   });
 }));
 
-// GET particular course AND user who created it
+// GET /api/courses/:id 200 - particular course AND user who created it route
 router.get('/courses/:id', asyncHandler( async(req, res) => {
   const course = await Course.findByPk(req.params.id);
   res.json({
@@ -124,7 +74,7 @@ router.get('/courses/:id', asyncHandler( async(req, res) => {
   });
 }));
 
-// POST create a course route
+// POST /api/courses/:id 201 - create a course route
 router.post('/courses', [
   check('title')
     .exists({ checkNull: true, checkFalsy: true })
@@ -146,7 +96,7 @@ router.post('/courses', [
 
 }));
 
-// PUT update a course route
+// PUT /api/courses/:id 204 - update a course route
 router.put('/courses/:id', asyncHandler( async(req, res) => {
   let course = await Course.findByPk(req.params.id);
 
@@ -164,7 +114,7 @@ router.put('/courses/:id', asyncHandler( async(req, res) => {
 
 }));
 
-// DELETE delete a course route
+// DELETE /api/courses/:id 204 - delete a course route
 router.delete('/courses/:id', asyncHandler( async(req, res) => {
   let course = await Course.findByPk(req.params.id);
 
