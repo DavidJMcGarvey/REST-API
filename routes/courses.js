@@ -66,17 +66,19 @@ const courseChecker = [
   check('description')
     .exists({ checkNull: true, checkFalsy: true })
     .withMessage('Please provide a value for "description"'),
-  check('estimatedTime')
-    .exists({ checkNull: true, checkFalsy: true })
-    .withMessage('Please provide a value for "estimatedTime"'),
-  check('materialsNeeded')
-    .exists({ checkNull: true, checkFalsy: true })
-    .withMessage('Please provide a value for "materialsNeeded"'),
+  // check('estimatedTime')
+  //   .exists({ checkNull: true, checkFalsy: true })
+  //   .withMessage('Please provide a value for "estimatedTime"'),
+  // check('materialsNeeded')
+  //   .exists({ checkNull: true, checkFalsy: true })
+  //   .withMessage('Please provide a value for "materialsNeeded"'),
 ];
 
 // GET /api/courses 200 - course listing route
 router.get('/courses', asyncHandler( async(req, res) => {
-  const courses = await Course.findAll();
+  const courses = await Course.findAll({
+    attributes: ['userId', 'title', 'description', 'estimatedTime', 'materialsNeeded']
+  });
   res.json({
     courses
   });
@@ -84,7 +86,10 @@ router.get('/courses', asyncHandler( async(req, res) => {
 
 // GET /api/courses/:id 200 - particular course AND user who created it route
 router.get('/courses/:id', asyncHandler( async(req, res) => {
-  const course = await Course.findByPk(req.params.id);
+  const course = await Course.findByPk(
+    req.params.id,
+    { attributes: ['userId', 'title', 'description', 'estimatedTime', 'materialsNeeded'] }
+    );
   res.json({
     course
   });
@@ -113,28 +118,36 @@ router.put('/courses/:id', courseChecker, authenticateUser, asyncHandler( async(
       const errorsMessages = errors.array().map(error => error.msg);
       return res.status(400).json({message: errorsMessages});
     } else {
-      course.title = req.body.title;
-      course.description = req.body.description;
-      course.estimatedTime = req.body.estimatedTime;
-      course.materialsNeeded = req.body.materialsNeeded;
-    
-      await course.save();
-      res.status(204).end();
+      if (req.currentUser.id === course.userId) {
+        course.title = req.body.title;
+        course.description = req.body.description;
+        course.estimatedTime = req.body.estimatedTime;
+        course.materialsNeeded = req.body.materialsNeeded;
+      
+        await course.save();
+        res.status(204).end();
+      } else {
+        res.status(403).json({message: "You can only edit your own courses :("});
+      } 
     }
-
   } else {
     res.status(404).json({message: "Couldn't find that course :("});
   }
 
 }));
 
+// TODO add authorization for DELETE
 // DELETE /api/courses/:id 204 - delete a course route
 router.delete('/courses/:id', authenticateUser, asyncHandler( async(req, res) => {
   let course = await Course.findByPk(req.params.id);
 
   if (course) {
-    await course.destroy();
-    res.status(204).end();
+    if (req.currentUser.id === course.userId) {
+      await course.destroy();
+      res.status(204).end();
+    } else {
+      res.status(403).json({message: "You can only delete your own courses :("});
+    }
   } else {
     res.status(404).json({message: "Couldn't find that course :("});
   }

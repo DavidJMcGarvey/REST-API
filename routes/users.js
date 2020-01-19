@@ -21,7 +21,7 @@ function asyncHandler(cb){
 }
 
 // Authenication middleware
-const authenticateUser = async (req, res, next) => {
+const authenticateUser = asyncHandler( async (req, res, next) => {
   let message = null;
   const credentials = auth(req);
 
@@ -30,6 +30,7 @@ const authenticateUser = async (req, res, next) => {
       where: {
         emailAddress: credentials.name,
       },
+      // attributes: ['firstName', 'lastName', 'emailAddress'],
     });
 
     if (user) {
@@ -56,7 +57,7 @@ const authenticateUser = async (req, res, next) => {
   } else {
     next();
   }
-};
+});
 
 const userChecker = [
   check('firstName')
@@ -66,7 +67,7 @@ const userChecker = [
     .exists({ checkNull: true, checkFalsy: true })
     .withMessage('Please provide a value for "lastName"'),
   check('emailAddress')
-    .exists({ checkNull: true, checkFalsy: true })
+    .exists({ checkNull: true, checkFalsy: true, isEmail: true })
     .withMessage('Please provide a value for "emailAddress"'),
   check('password')
     .exists({ checkNull: true, checkFalsy: true })
@@ -81,6 +82,7 @@ router.get('/users', authenticateUser, (req, res) => {
   });
 });
 
+// TODO catch SequelizeValidationError isEmail and unique
 // POST /api/users 201 - create a user route
 router.post('/users', userChecker, asyncHandler( async(req, res) => {
   const errors =  validationResult(req);

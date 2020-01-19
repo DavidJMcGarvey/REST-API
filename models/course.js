@@ -33,9 +33,11 @@ module.exports = (sequelize) => {
     },
     estimatedTime: {
       type: Sequelize.INTEGER,
+      allowNull: true,
     },
     materialsNeeded: {
       type: Sequelize.STRING,
+      allowNull: true,
     }
   }, { sequelize });
 
