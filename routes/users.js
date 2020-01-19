@@ -67,7 +67,7 @@ const userChecker = [
     .exists({ checkNull: true, checkFalsy: true })
     .withMessage('Please provide a value for "lastName"'),
   check('emailAddress')
-    .exists({ checkNull: true, checkFalsy: true, isEmail: true })
+    .exists({ checkNull: true, checkFalsy: true})
     .withMessage('Please provide a value for "emailAddress"'),
   check('password')
     .exists({ checkNull: true, checkFalsy: true })

@@ -34,12 +34,15 @@ module.exports = (sequelize) => {
         notEmpty: {
           msg: '"Email" is required'
         },
-        isEmail: true,
-        unique: {
-          args: true,
-          msg: 'Email address already exists! Try another one :)'
+        isEmail: {
+          msg: 'Not a valid email address'
         }
-      }},
+      },
+      unique: {
+        args: true,
+        msg: 'Email address already exists! Try another one :)'
+      }
+    },
     password: {
       type: Sequelize.STRING,
       validate: {
