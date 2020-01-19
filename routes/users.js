@@ -27,10 +27,11 @@ const authenticateUser = asyncHandler( async (req, res, next) => {
 
   if (credentials) {
     const user = await User.findOne({
+      
       where: {
         emailAddress: credentials.name,
       },
-      // attributes: ['firstName', 'lastName', 'emailAddress'],
+      
     });
 
     if (user) {
@@ -77,12 +78,15 @@ const userChecker = [
 // GET /api/users 200 - return current user route
 router.get('/users', authenticateUser, (req, res) => {
   const user = req.currentUser;
+  attributes: ['id', 'firstName', 'lastName', 'emailAddress'],
   res.json({
-    user
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    emailAddress: user.emailAddress
   });
 });
 
-// TODO catch SequelizeValidationError isEmail and unique
 // POST /api/users 201 - create a user route
 router.post('/users', userChecker, asyncHandler( async(req, res) => {
   const errors =  validationResult(req);
@@ -94,7 +98,7 @@ router.post('/users', userChecker, asyncHandler( async(req, res) => {
     user.password = bcryptjs.hashSync(user.password);
 
     await User.create(req.body);
-    res.status(201).end();
+    res.status(201).location('/').end();
   }
 
 }));
@@ -115,6 +119,18 @@ router.put('/users/:id', authenticateUser, asyncHandler( async(req, res) => {
     res.status(404).json({message: "Couldn't find that user :("});
   }
 
+}));
+
+//TEMP DELETE ROUTE
+router.delete('/users/:id', authenticateUser, asyncHandler( async(req, res) => {
+  let user = await User.findByPk(req.params.id);
+
+  if (user) {
+    await user.destroy();
+    res.status(204).end();
+  } else {
+    res.status(404).json({message: "Couldn't find that user :("});
+  }
 }));
 
 module.exports = router;

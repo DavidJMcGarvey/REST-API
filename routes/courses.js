@@ -66,12 +66,6 @@ const courseChecker = [
   check('description')
     .exists({ checkNull: true, checkFalsy: true })
     .withMessage('Please provide a value for "description"'),
-  // check('estimatedTime')
-  //   .exists({ checkNull: true, checkFalsy: true })
-  //   .withMessage('Please provide a value for "estimatedTime"'),
-  // check('materialsNeeded')
-  //   .exists({ checkNull: true, checkFalsy: true })
-  //   .withMessage('Please provide a value for "materialsNeeded"'),
 ];
 
 // GET /api/courses 200 - course listing route
@@ -103,7 +97,7 @@ router.post('/courses', courseChecker, authenticateUser, asyncHandler( async(req
     return res.status(400).json({message: errorsMessages});
   } else {
     await Course.create(req.body);
-    res.status(201).end();
+    res.status(201).location(`/courses/${course.id}`).end();
   }
 
 }));
@@ -136,7 +130,6 @@ router.put('/courses/:id', courseChecker, authenticateUser, asyncHandler( async(
 
 }));
 
-// TODO add authorization for DELETE
 // DELETE /api/courses/:id 204 - delete a course route
 router.delete('/courses/:id', authenticateUser, asyncHandler( async(req, res) => {
   let course = await Course.findByPk(req.params.id);
