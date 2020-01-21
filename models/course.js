@@ -32,7 +32,7 @@ module.exports = (sequelize) => {
       }
     },
     estimatedTime: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
       allowNull: true,
     },
     materialsNeeded: {

@@ -16,6 +16,7 @@ function asyncHandler(cb){
     try {
       await cb(req, res, next)
     } catch(error){
+      console.log(error);
       res.status(500).send(error);
     }
   }
@@ -71,7 +72,12 @@ const courseChecker = [
 // GET /api/courses 200 - course listing route
 router.get('/courses', asyncHandler( async(req, res) => {
   const courses = await Course.findAll({
-    attributes: ['userId', 'title', 'description', 'estimatedTime', 'materialsNeeded']
+    attributes: ['userId', 'title', 'description', 'estimatedTime', 'materialsNeeded'],
+    include: {
+      model: User,
+      as: 'author',
+      attributes: ['id', 'firstName', 'lastName', 'emailAddress'],
+    }
   });
   res.json({
     courses
@@ -82,7 +88,14 @@ router.get('/courses', asyncHandler( async(req, res) => {
 router.get('/courses/:id', asyncHandler( async(req, res) => {
   const course = await Course.findByPk(
     req.params.id,
-    { attributes: ['userId', 'title', 'description', 'estimatedTime', 'materialsNeeded'] }
+    { 
+      attributes: ['userId', 'title', 'description', 'estimatedTime', 'materialsNeeded'],
+      include: {
+        model: User,
+        as: 'author',
+        attributes: ['id', 'firstName', 'lastName', 'emailAddress'],
+      }
+    }
     );
   res.json({
     course
@@ -96,7 +109,7 @@ router.post('/courses', courseChecker, authenticateUser, asyncHandler( async(req
     const errorsMessages = errors.array().map(error => error.msg);
     return res.status(400).json({message: errorsMessages});
   } else {
-    await Course.create(req.body);
+    const course = await Course.create(req.body);
     res.status(201).location(`/courses/${course.id}`).end();
   }
 
