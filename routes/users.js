@@ -15,6 +15,7 @@ function asyncHandler(cb){
     try {
       await cb(req, res, next)
     } catch(error){
+      console.log(error);
       res.status(500).send(error);
     }
   }
@@ -27,11 +28,9 @@ const authenticateUser = asyncHandler( async (req, res, next) => {
 
   if (credentials) {
     const user = await User.findOne({
-      
       where: {
         emailAddress: credentials.name,
       },
-      
     });
 
     if (user) {
@@ -88,20 +87,27 @@ router.get('/users', authenticateUser, (req, res) => {
 });
 
 // POST /api/users 201 - create a user route
-router.post('/users', userChecker, asyncHandler( async(req, res) => {
-  const errors =  validationResult(req);
-  if (!errors.isEmpty()) {
-    const errorMessages = errors.array().map(error => error.msg);
-    return res.status(400).json({ errors: errorMessages });
-  } else {
-    const user = await req.body;
-    user.password = bcryptjs.hashSync(user.password);
-
-    await User.create(req.body);
-    res.status(201).location('/').end();
+router.post('/users', userChecker, async(req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorMessages = errors.array().map(error => error.msg);
+      return res.status(400).json({ errors: errorMessages });
+    } else {
+      const user = await req.body;
+      user.password = bcryptjs.hashSync(user.password);
+  
+      await User.create(req.body);
+      res.status(201).location('/').end();
+    }
+  } catch (error) {
+    console.log(error);
+    const whoopsies = error.errors.map(error => error.message);
+    res.status(409).json({ whoopsies });
   }
 
-}));
+
+});
 
 // PUT /api/courses/:id 204 - update a course route
 router.put('/users/:id', authenticateUser, asyncHandler( async(req, res) => {
