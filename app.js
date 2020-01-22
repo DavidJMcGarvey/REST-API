@@ -3,6 +3,7 @@
 // Load modules
 const express = require('express');
 const morgan = require('morgan');
+const index = require('./routes/index');
 const users = require('./routes/users');
 const courses = require('./routes/courses');
 const bodyParser = require('body-parser');
@@ -23,6 +24,7 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 
 // Add routes
+app.use('/', index)
 app.use('/api', users);
 app.use('/api', courses);
 

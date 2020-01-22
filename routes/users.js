@@ -74,6 +74,14 @@ const userChecker = [
     .withMessage('Please provide a value for "password"'),
 ];
 
+// GET Welcome JSON message as a home route
+router.get('/', asyncHandler((req, res) => {
+  res.json({
+    Greetings: "Welcome to Davey's REST API!",
+    Did: "you know this would pair well with a nice front-end?"
+  });
+})); 
+
 // GET /api/users 200 - return current user route
 router.get('/users', authenticateUser, (req, res) => {
   const user = req.currentUser;
