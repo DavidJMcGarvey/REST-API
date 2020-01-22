@@ -4,14 +4,13 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "nodemon ./app.js",
     "seed": "cross-env DB_ENABLE_LOGGING=true node './seed'"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^1.19.4",
     "sequelize-cli": "^5.5.1"
   },
   "dependencies": {
@@ -21,6 +20,7 @@
     "cross-env": "^5.2.0",
     "express": "^4.16.3",
     "express-validator": "^6.3.1",
+    "nodemon": "^1.19.4",
     "morgan": "^1.9.0",
     "mysql2": "^2.1.0",
     "promise.prototype.finally": "^3.1.0",
