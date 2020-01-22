@@ -71,7 +71,7 @@ const courseChecker = [
 // GET /api/courses 200 - course listing route
 router.get('/courses', asyncHandler( async(req, res) => {
   const courses = await Course.findAll({
-    attributes: ['userId', 'title', 'description', 'estimatedTime', 'materialsNeeded'],
+    attributes: ['id', 'userId', 'title', 'description', 'estimatedTime', 'materialsNeeded'],
     include: {
       model: User,
       as: 'author',
@@ -88,7 +88,7 @@ router.get('/courses/:id', asyncHandler( async(req, res) => {
   const course = await Course.findByPk(
     req.params.id,
     { 
-      attributes: ['userId', 'title', 'description', 'estimatedTime', 'materialsNeeded'],
+      attributes: ['id', 'userId', 'title', 'description', 'estimatedTime', 'materialsNeeded'],
       include: {
         model: User,
         as: 'author',
